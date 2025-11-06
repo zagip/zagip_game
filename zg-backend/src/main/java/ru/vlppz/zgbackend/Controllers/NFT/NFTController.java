@@ -5,6 +5,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
+import ru.vlppz.zgbackend.DB.Auction.AuctionRepository;
 import ru.vlppz.zgbackend.DB.NFT.NFT;
 import ru.vlppz.zgbackend.DB.NFT.NFTRepository;
 import ru.vlppz.zgbackend.DB.User.User;
@@ -21,6 +22,9 @@ public class NFTController {
     
     @Autowired
     private UserRepository userRepository;
+    
+    @Autowired
+    private AuctionRepository auctionRepository;
     
 
 
@@ -185,6 +189,14 @@ public class NFTController {
                 return ResponseEntity.badRequest().body(response);
             }
             
+            // Check if NFT has active auctions
+            var activeAuction = auctionRepository.findByNftAndActiveTrue(nft);
+            if (activeAuction.isPresent()) {
+                response.status = "error";
+                response.error = "Нельзя продать NFT с активным аукционом. Сначала отмените аукцион.";
+                return ResponseEntity.badRequest().body(response);
+            }
+            
             // Sell for 75% of original price
             Long sellPrice = (long) (nft.getPrice() * 0.75);
             user.setBalance(user.getBalance() + sellPrice);
@@ -193,10 +205,10 @@ public class NFTController {
             if (user.getPinnedNFT() != null && user.getPinnedNFT().equals(nft)) {
                 user.setPinnedNFT(null);
             }
-            nft.setOwner(null);
             
+            // Delete the NFT completely instead of returning to shop
+            nftRepository.delete(nft);
             userRepository.save(user);
-            nftRepository.save(nft);
             
             response.status = "ok";
             response.message = "NFT продан за " + sellPrice + " монет";

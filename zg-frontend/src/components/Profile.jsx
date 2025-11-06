@@ -527,7 +527,7 @@ const Profile = ({ user: initialUser, refreshUserData }) => {
                                     </div>
                                     <div className="nft-preview-info">
                                         <div className="nft-preview-price">Цена: {selectedNFT.price} 🪙</div>
-                                        <div className="nft-preview-sell">Продать за: {Math.floor(selectedNFT.price * 0.75)} 🪙</div>
+                                        <div className="nft-preview-sell">Продать за: {Math.floor(selectedNFT.price * 0.75)} 🪙 (NFT будет удален)</div>
                                     </div>
                                 </div>
 
@@ -559,7 +559,7 @@ const Profile = ({ user: initialUser, refreshUserData }) => {
                                         onClick={() => handleNFTAction('sell', selectedNFT.id)}
                                         disabled={actionLoading}
                                     >
-                                        <FaStar /> Продать
+                                        <FaStar /> Продать и удалить
                                     </button>
                                 </div>
 
