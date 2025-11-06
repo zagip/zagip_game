@@ -1,0 +1,16 @@
+# Build artifacts
+build/
+.gradle/
+
+# IDE
+.idea/
+*.iml
+
+# OS
+.DS_Store
+
+# Git
+.git/
+
+# Logs
+*.log

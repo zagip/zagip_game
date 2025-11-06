@@ -1,0 +1,58 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: zg-postgres
+    environment:
+      POSTGRES_DB: postgres
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - zg-network
+
+  backend:
+    build:
+      context: ./zg-backend
+      dockerfile: Dockerfile
+    container_name: zg-backend
+    environment:
+      DATABASE_URL: jdbc:postgresql://postgres:5432/postgres
+      DATABASE_USERNAME: postgres
+      DATABASE_PASSWORD: postgres
+      JWT_SECRET: ${JWT_SECRET}
+      TELEGRAM_BOT_TOKEN: ${TELEGRAM_BOT_TOKEN}
+      TELEGRAM_BOT_USERNAME: ${TELEGRAM_BOT_USERNAME}
+    ports:
+      - "8080:8080"
+    depends_on:
+      - postgres
+    networks:
+      - zg-network
+    volumes:
+      - ./zg-backend/uploads:/app/uploads
+
+  frontend:
+    build:
+      context: ./zg-frontend
+      dockerfile: Dockerfile
+    container_name: zg-frontend
+    environment:
+      VITE_API_URL: http://localhost:8080/api
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend
+    networks:
+      - zg-network
+
+volumes:
+  postgres_data:
+
+networks:
+  zg-network:
+    driver: bridge

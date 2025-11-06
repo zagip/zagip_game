@@ -1,0 +1,23 @@
+# Dependencies
+node_modules/
+
+# Build artifacts
+dist/
+
+# IDE
+.vscode/
+
+# OS
+.DS_Store
+
+# Git
+.git/
+
+# Environment (will be set via docker-compose)
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Logs
+*.log
