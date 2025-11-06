@@ -6,8 +6,10 @@ import org.springframework.http.MediaType;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import ru.vlppz.zgbackend.DB.Auction.AuctionRepository;
 import ru.vlppz.zgbackend.DB.NFT.NFT;
 import ru.vlppz.zgbackend.DB.NFT.NFTRepository;
+import ru.vlppz.zgbackend.DB.User.UserRepository;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -24,6 +26,12 @@ import java.util.UUID;
 public class AdminNFTController {
     @Autowired
     private NFTRepository nftRepository;
+    
+    @Autowired
+    private AuctionRepository auctionRepository;
+    
+    @Autowired
+    private UserRepository userRepository;
 
     @PostMapping(value = "/create", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<NFTCreateResponse> createNFT(
@@ -79,7 +87,7 @@ public class AdminNFTController {
         }
     }
 
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/delete")
     public ResponseEntity<NFTDeleteResponse> deleteNFT(@RequestBody NFTDeleteRequest nftDeleteRequest) {
         NFTDeleteResponse response = new NFTDeleteResponse();
         
@@ -88,11 +96,25 @@ public class AdminNFTController {
             if (nftOptional.isEmpty()) {
                 response.status = "error";
                 response.error = "NFT не найден";
-                return ResponseEntity.notFound().build();
+                return ResponseEntity.badRequest().body(response);
             }
 
             NFT nft = nftOptional.get();
             
+            // If NFT is owned, unpin it from the owner first
+            if (nft.getOwner() != null) {
+                var owner = nft.getOwner();
+                if (owner.getPinnedNFT() != null && owner.getPinnedNFT().equals(nft)) {
+                    owner.setPinnedNFT(null);
+                    userRepository.save(owner);
+                }
+            }
+            
+            // Delete all auction records for this NFT first (including active and inactive ones)
+            var allAuctions = auctionRepository.findByNft(nft);
+            auctionRepository.deleteAll(allAuctions);
+            
+            // Delete the image file if it exists
             if (nft.getImageURL() != null && nft.getImageURL().startsWith("/api/uploads/")) {
                 String filename = nft.getImageURL().replace("/api/uploads/", "");
                 Path imagePath = Paths.get("uploads", filename);
@@ -103,7 +125,8 @@ public class AdminNFTController {
                 }
             }
 
-            nftRepository.deleteById(nftDeleteRequest.id);
+            // Now safely delete the NFT
+            nftRepository.delete(nft);
             
             response.status = "ok";
             response.message = "NFT успешно удален";
