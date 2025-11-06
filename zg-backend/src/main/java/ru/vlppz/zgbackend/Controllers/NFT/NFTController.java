@@ -35,6 +35,13 @@ public class NFTController {
         return ResponseEntity.ok().body(response);
     }
 
+    @GetMapping("/admin/all")
+    public ResponseEntity<NFTListResponse> listAllNFTsForAdmin() {
+        NFTListResponse response = new NFTListResponse();
+        response.nfts = nftRepository.findAll().stream().toList();
+        return ResponseEntity.ok().body(response);
+    }
+
     @PostMapping("/buy")
     public ResponseEntity<NFTBuyResponse> buyNFT(@RequestBody NFTBuyRequest request, Authentication authentication) {
         NFTBuyResponse response = new NFTBuyResponse();
@@ -205,6 +212,10 @@ public class NFTController {
             if (user.getPinnedNFT() != null && user.getPinnedNFT().equals(nft)) {
                 user.setPinnedNFT(null);
             }
+            
+            // Delete all auction records for this NFT first (including inactive ones)
+            var allAuctions = auctionRepository.findByNft(nft);
+            auctionRepository.deleteAll(allAuctions);
             
             // Delete the NFT completely instead of returning to shop
             nftRepository.delete(nft);

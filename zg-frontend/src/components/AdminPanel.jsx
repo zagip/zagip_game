@@ -371,7 +371,7 @@ const AdminPanel = () => {
         headers['Authorization'] = `Bearer ${token}`
       }
 
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/nft/all`, {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/nft/admin/all`, {
         headers: headers
       })
 

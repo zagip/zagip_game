@@ -11,4 +11,5 @@ public interface AuctionRepository extends JpaRepository<Auction, Long> {
     List<Auction> findByActiveTrue();
     List<Auction> findBySellerAndActiveTrue(User seller);
     Optional<Auction> findByNftAndActiveTrue(NFT nft);
+    List<Auction> findByNft(NFT nft);
 }
