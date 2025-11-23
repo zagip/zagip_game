@@ -856,7 +856,7 @@ const AdminPanel = () => {
                         className="input"
                         placeholder="100"
                         step="1"
-                        min="0"
+                        // min="0"
                         style={{ textAlign: 'left' }}
                         required
                       />
