@@ -237,10 +237,10 @@ const AdminPanel = () => {
   const handleCodeSubmit = (e) => {
     e.preventDefault()
 
-    if (!codeForm.reward || parseInt(codeForm.reward) <= 0) {
-      setCodeMessage('❌ Введите корректную награду')
-      return
-    }
+    // if (!codeForm.reward || parseInt(codeForm.reward) <= 0) {
+    //   setCodeMessage('❌ Введите корректную награду')
+    //   return
+    // }
     if (!codeForm.maxUses || parseInt(codeForm.maxUses) <= 0) {
       setCodeMessage('❌ Введите корректное количество использований')
       return
